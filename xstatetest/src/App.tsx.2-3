@@ -31,7 +31,17 @@ function App() {
           ></div>
         </output>
         <div className="buttonBox">
-          <button onClick={() => send("CHANGE")}>Change Light</button>
+          <button
+            disabled={!!state.context.outage}
+            onClick={() => send("CHANGE")}
+          >
+            Change Light
+          </button>
+          <button
+            onClick={() => send("OUTAGE", { value: !state.context.outage })}
+          >
+            Toggle Outage
+          </button>
         </div>
       </header>
     </div>

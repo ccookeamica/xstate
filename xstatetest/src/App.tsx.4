@@ -31,7 +31,23 @@ function App() {
           ></div>
         </output>
         <div className="buttonBox">
-          <button onClick={() => send("CHANGE")}>Change Light</button>
+          <button
+            disabled={!!state.context.outage}
+            onClick={() => send("CHANGE")}
+          >
+            Change Light
+          </button>
+          <button onClick={() => send("WALK")}>Toggle Walk</button>
+          <button
+            onClick={() => send("OUTAGE", { value: !state.context.outage })}
+          >
+            Toggle Outage
+          </button>
+        </div>
+        <div className="walkbox">
+          {(state.context.walk && <span className="walk">WALK</span>) || (
+            <span className="nowalk">DON'T WALK</span>
+          )}
         </div>
       </header>
     </div>

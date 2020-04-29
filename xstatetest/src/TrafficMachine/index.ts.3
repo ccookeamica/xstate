@@ -4,17 +4,21 @@ interface LightContext {
   elapsed: number;
   interval: number;
   light: string;
+  outage: boolean;
 }
 
-type LightEvent = {
-  type: "CHANGE";
-};
+type LightEvent =
+  | {
+      type: "CHANGE";
+    }
+  | { type: "OUTAGE"; value: boolean };
 
 interface LightStateSchema {
   states: {
     green: {};
     yellow: {};
     red: {};
+    redblink: {};
   };
 }
 
@@ -31,6 +35,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
       elapsed: 0,
       interval: 1,
       light: "green",
+      outage: false,
     },
 
     //State definitions
@@ -54,6 +59,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "yellow",
             }),
+            cond: "inOutage",
           },
         },
       },
@@ -76,6 +82,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "red",
             }),
+            cond: "inOutage",
           },
         },
       },
@@ -98,8 +105,25 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "green",
             }),
+            cond: "inOutage",
           },
         },
+      },
+      redblink: {},
+    },
+    on: {
+      OUTAGE: {
+        actions: assign<LightContext>({
+          light: (ctx) => (ctx.outage ? "green" : "redblink"),
+          outage: (ctx) => !ctx.outage,
+        }),
+      },
+    },
+  },
+  {
+    guards: {
+      inOutage: (context) => {
+        return !context.outage;
       },
     },
   }

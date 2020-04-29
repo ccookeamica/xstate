@@ -111,3 +111,36 @@ button.disabled {
   background-color: gray;
   color: black;
 }
+
+.walkbox {
+  height: 50px;
+  width: 150px;
+}
+
+.walk {
+  font-family: "Arial Rounded MT Bold";
+  font-size: 36px;
+  font-weight: bolder;
+  color: white;
+}
+
+.walkblink {
+  animation: walkblink 0.7s infinite;
+  animation-timing-function: ease-in;
+}
+
+@keyframes walkblink {
+  from {
+    color: red;
+  }
+  to {
+    color: black;
+  }
+}
+
+.nowalk {
+  font-family: "Arial Rounded MT Bold";
+  font-size: 36px;
+  font-weight: bolder;
+  color: red;
+}

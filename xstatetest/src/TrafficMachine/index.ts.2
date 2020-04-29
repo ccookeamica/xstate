@@ -4,17 +4,21 @@ interface LightContext {
   elapsed: number;
   interval: number;
   light: string;
+  outage: boolean; //NEW!!!
 }
 
-type LightEvent = {
-  type: "CHANGE";
-};
+type LightEvent =
+  | {
+      type: "CHANGE";
+    }
+  | { type: "OUTAGE"; value: boolean }; //NEW!!!
 
 interface LightStateSchema {
   states: {
     green: {};
     yellow: {};
     red: {};
+    redblink: {}; //NEW!!
   };
 }
 
@@ -31,6 +35,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
       elapsed: 0,
       interval: 1,
       light: "green",
+      outage: false, //NEW!!
     },
 
     //State definitions
@@ -55,6 +60,14 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               light: "yellow",
             }),
           },
+          OUTAGE: {
+            //NEW!!!
+            target: "redblink",
+            actions: assign<LightContext>({
+              outage: (ctx) => true,
+              light: "redblink",
+            }),
+          },
         },
       },
       yellow: {
@@ -77,6 +90,14 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               light: "red",
             }),
           },
+          OUTAGE: {
+            //NEW!!
+            target: "redblink",
+            actions: assign<LightContext>({
+              outage: (ctx) => true,
+              light: "redblink",
+            }),
+          },
         },
       },
       red: {
@@ -97,6 +118,26 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
             actions: assign<LightContext>({
               elapsed: (ctx) => 0,
               light: "green",
+            }),
+          },
+          OUTAGE: {
+            //NEW!!
+            target: "redblink",
+            actions: assign<LightContext>({
+              outage: (ctx) => true,
+              light: "redblink",
+            }),
+          },
+        },
+      },
+      redblink: {
+        //NEW!!!
+        on: {
+          OUTAGE: {
+            target: "red",
+            actions: assign<LightContext>({
+              outage: (ctx) => false,
+              light: "red",
             }),
           },
         },

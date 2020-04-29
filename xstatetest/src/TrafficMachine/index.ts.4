@@ -4,17 +4,23 @@ interface LightContext {
   elapsed: number;
   interval: number;
   light: string;
+  outage: boolean;
+  walk: boolean; //NEW!!
 }
 
-type LightEvent = {
-  type: "CHANGE";
-};
+type LightEvent =
+  | {
+      type: "CHANGE";
+    }
+  | { type: "OUTAGE"; value: boolean }
+  | { type: "WALK"; value: boolean }; //NEW!!
 
 interface LightStateSchema {
   states: {
     green: {};
     yellow: {};
     red: {};
+    redblink: {};
   };
 }
 
@@ -31,6 +37,8 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
       elapsed: 0,
       interval: 1,
       light: "green",
+      outage: false,
+      walk: false, //NEW!!
     },
 
     //State definitions
@@ -54,6 +62,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "yellow",
             }),
+            cond: "inOutage",
           },
         },
       },
@@ -76,6 +85,7 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "red",
             }),
+            cond: "inOutage",
           },
         },
       },
@@ -98,8 +108,31 @@ export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
               elapsed: (ctx) => 0,
               light: "green",
             }),
+            cond: "inOutage",
           },
         },
+      },
+      redblink: {},
+    },
+    on: {
+      OUTAGE: {
+        actions: assign<LightContext>({
+          light: (ctx) => (ctx.outage ? "green" : "redblink"),
+          outage: (ctx) => !ctx.outage,
+        }),
+      },
+      WALK: {
+        //NEW!!!
+        actions: assign<LightContext>({
+          walk: (ctx) => !ctx.walk,
+        }),
+      },
+    },
+  },
+  {
+    guards: {
+      inOutage: (context) => {
+        return !context.outage;
       },
     },
   }
